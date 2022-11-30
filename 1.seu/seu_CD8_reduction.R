@@ -82,13 +82,13 @@ p2 = DimPlot(reCD8,group.by = 'manual.celltype.minor')
 p3 = p1|p2
 ggsave('oldlabel.filter.png',p3,width = 10,height = 4)
 
-p4 = FeaturePlot(reCD8,features = c('TCF7'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
-p5 = FeaturePlot(reCD8,features = c('CCR7'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
-p6 = FeaturePlot(reCD8,features = c('IL7R'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
+p4 = FeaturePlot(reCD8,features = c('CCR7'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
+p5 = FeaturePlot(reCD8,features = c('IL7R'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
+p6 = FeaturePlot(reCD8,features = c('ZNF683'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p7 = FeaturePlot(reCD8,features = c('PDCD1'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p8 = FeaturePlot(reCD8,features = c('CTLA4'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
-p9 = FeaturePlot(reCD8,features = c('HAVCR2'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
-p10 = FeaturePlot(reCD8,features = c('IFNG'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
+p9 = FeaturePlot(reCD8,features = c('ISG15'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
+p10 = FeaturePlot(reCD8,features = c('SLC4A10'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p11 = FeaturePlot(reCD8,features = c('GZMB'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p12 = FeaturePlot(reCD8,features = c('GZMK'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p13 = (p4|p5|p6)/(p7|p8|p9)/(p10|p11|p12)
@@ -244,3 +244,57 @@ before = subset(tumor,sample.timepoint == 'Before')
 
 p = plot.fc(before,cluster = 'manual.celltype.minor',norm.col = 'steelblue',sign.col = 'firebrick4',mytitle = 'Pre-Treatment')
 ggsave('preFC.png',p,width = 6,height = 4)
+
+# bc_bassez----------------
+bassez = subset(reCD8,Study == 'BC_Bassez')
+bassez$treatment.efficacy = ifelse(bassez$treatment.efficacy=='R','E','NE')
+before.ba = subset(bassez,sample.timepoint == 'Before')
+after.ba = subset(bassez,sample.timepoint == 'After')
+before.ba.e = subset(before.ba,treatment.efficacy == 'E')
+before.ba.ne = subset(before.ba,treatment.efficacy == 'NE')
+after.ba.e = subset(after.ba,treatment.efficacy == 'E')
+after.ba.ne = subset(after.ba,treatment.efficacy == 'NE')
+
+p1 = DimPlot(before.ba.e,group.by = 'manual.celltype.major',
+        cols = mycol[c(1,2,5,6,7,8,9,10,12,13,14)],raster = F)+
+  NoAxes()+labs(title = '',tag = 'E',x = 'UMAP1',y = 'UMAP2')+
+  theme(plot.tag = element_text(face = 'plain',size = 10),
+        axis.line.x = element_line(size = 0.5),
+        axis.line.y = element_line(size = 0.5),
+        #axis.title.x = element_text(colour = 'black'),
+        axis.title.y = element_text(colour = 'black',angle = 90,size = 10))
+p2 = DimPlot(before.ba.ne,group.by = 'manual.celltype.major',
+        cols = mycol[c(1,2,5,6,7,8,9,10,12,13,14)],raster = F)+
+  NoAxes()+labs(title = '',tag = 'NE')+
+  theme(plot.tag = element_text(face = 'plain',size = 10),
+        axis.line.x = element_line(size = 0.5),
+        #axis.line.y = element_line(size = 0.5),
+        #axis.title.x = element_text(colour = 'black')
+        )
+
+p3 = p1+p2+plot_layout(guides = 'collect')+
+  plot_annotation(title = 'Pre-Treatment',theme = theme(plot.title = element_text(hjust = 0.4)))
+p3
+
+p4 = DimPlot(after.ba.e,group.by = 'manual.celltype.major',
+             cols = mycol[c(1,2,5,6,7,8,9,10,12,13,14)],raster = F)+
+  NoAxes()+labs(title = '',tag = 'E',x = 'UMAP1',y = 'UMAP2')+
+  theme(plot.tag = element_text(face = 'plain',size = 10),
+        axis.line.x = element_line(size = 0.5),
+        axis.line.y = element_line(size = 0.5),
+        axis.title.x = element_text(colour = 'black',size = 10),
+        axis.title.y = element_text(colour = 'black',size = 10,angle = 90))
+p5 = DimPlot(after.ba.ne,group.by = 'manual.celltype.major',
+             cols = mycol[c(1,2,5,6,7,8,9,10,12,13,14)],raster = F)+
+  NoAxes()+labs(title = '',tag = 'NE')+
+  theme(plot.tag = element_text(face = 'plain',size = 10),
+        axis.line.x = element_line(size = 0.5),
+        #axis.line.y = element_line(size = 0.5),
+        axis.title.x = element_text(colour = 'black',size = 10))
+
+p6 = p4+p5+plot_layout(guides = 'collect')+
+  plot_annotation(title = 'Post-Treatment',theme = theme(plot.title = element_text(hjust = 0.4)))
+
+p6
+ggsave('bassez.pre.png',p3,width = 10,height = 4)
+ggsave('bassez.post.png',p6,width = 10,height = 4)

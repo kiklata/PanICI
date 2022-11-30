@@ -2,15 +2,10 @@ library(Seurat)
 
 setwd('~/PaperCD8/data/Tex')
 
-selected.all.T <- readRDS("~/PaperCD8/data/selected.all.T.rds")
+CD8.Tex.harmony <- readRDS("~/CD8.Tex.harmony.rds")
 
-selected.all.T.meta <- readRDS("~/PaperCD8/data/selected.all.T.meta.rds")
-selected.all.T@meta.data = selected.all.T.meta
-
-CD8 = subset(selected.all.T,manual.celltype.minor == 'CD8.Tex')
-
-before = subset(CD8,sample.timepoint == 'Before')
-after = subset(CD8,sample.timepoint == 'After')
+before = subset(CD8.Tex.harmony,sample.timepoint == 'Before')
+after = subset(CD8.Tex.harmony,sample.timepoint == 'After')
 
 sample = names(table(before$sample.ID))
 

@@ -35,25 +35,28 @@ plot.fc = function(obj,cluster,norm.col = 'steelblue',sign.col = 'firebrick4',my
   
   celltype.fc.d = as.data.frame(celltype.fc)
   celltype.fc.d$celltype = rownames(celltype.fc.d)
-  threhold = head(celltype.fc.d$celltype.fc[order(celltype.fc.d$celltype.fc,decreasing = T)],2)[2]
-  celltype.fc.d$type = if_else(celltype.fc.d$celltype.fc<threhold,'norm','sign')
+  pos.threhold = head(celltype.fc.d$celltype.fc[order(celltype.fc.d$celltype.fc,decreasing = T)],2)[2]
+  neg.threhold = head(rev(celltype.fc.d$celltype.fc[order(celltype.fc.d$celltype.fc,decreasing = T)]),2)[2]
+  celltype.fc.d$type = if_else((celltype.fc.d$celltype.fc < pos.threhold)&
+                                 (celltype.fc.d$celltype.fc > neg.threhold),'norm','sign')
  
   
   if(cluster == 'manual.celltype.minor') {
-    
-    celltype.fc.d$celltype = factor(celltype.fc.d$celltype,levels = c('Tn.c01.CCR7','Tem.c02.GZMK','Tem.c03.HMGB2','Tem.c04.GZMH',
-                                                    'Tm.c05.NR4A1','T.c06.MHCII','Trm.c07.ZNF683','Tex.c08.CXCL13',
-                                                    'T.c09.IFN','T.c10.STMN1','T.c11.ASPN','T.c12.NK-like',
-                                                    'MAIT.c13','γδT.c14.GNLY','γδT.c15.TRDV1','γδT.c16.TRDV2'))
+    celltype.fc.d$celltype = factor(celltype.fc.d$celltype,levels = celltype.fc.d$celltype[order(celltype.fc.d$celltype.fc,decreasing = T)])
+    #celltype.fc.d$celltype = factor(celltype.fc.d$celltype,levels = c('Tn.c01.CCR7','Tem.c02.GZMK','Tem.c03.HMGB2','Tem.c04.GZMH',
+    #                                                'Tm.c05.NR4A1','T.c06.MHCII','Trm.c07.ZNF683','Tex.c08.CXCL13',
+    #                                                'T.c09.IFN','T.c10.STMN1','T.c11.ASPN','T.c12.NK-like',
+    #                                                'MAIT.c13','γδT.c14.GNLY','γδT.c15.TRDV1','γδT.c16.TRDV2'))
   }else if(cluster == 'manual.celltype.major'){
-    celltype.fc.d$celltype = factor(celltype.fc.d$celltype,levels = c('Naive','Effector memory','Memory','MHC II','Resident memory','Exhausted',
-                                                    'Interferon','Cycling','NK-like','MAIT','γδT'))
+    celltype.fc.d$celltype = factor(celltype.fc.d$celltype,levels = celltype.fc.d$celltype[order(celltype.fc.d$celltype.fc,decreasing = T)])
+    #celltype.fc.d$celltype = factor(celltype.fc.d$celltype,levels = c('Naive','Effector memory','Memory','MHC II','Resident memory','Exhausted',
+    #                                                'Interferon','Cycling','NK-like','MAIT','γδT'))
   }
   
-  celltype.fc.d = celltype.fc.d[order(celltype.fc.d$celltype),]
-  
-  norm = filter(celltype.fc.d,type=='norm')
-  sign = filter(celltype.fc.d,type=='sign')
+  #celltype.fc.d = celltype.fc.d[order(celltype.fc.d$celltype.fc,decreasing = T),]
+  #celltype.fc.d$celltype.fc = factor(celltype.fc.d$celltype.fc,levels = celltype.fc.d$celltype.fc)
+  #norm = filter(celltype.fc.d,type=='norm')
+  #sign = filter(celltype.fc.d,type=='sign')
 
   p = ggplot(celltype.fc.d,aes(x = celltype,y = celltype.fc))+
     geom_bar(aes(fill = type),stat = "identity",show.legend = F)+
