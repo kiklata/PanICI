@@ -14,5 +14,5 @@ ADJACENCIES_FNAME = os.path.join(RESULTS_FOLDERNAME, '{}.adjacencies.tsv'.format
 
 os.system("pyscenic grn %s %s \
     -o %s \
-    --num_workers 8 \
+    --num_workers 4 \
     --method grnboost2" %(EXP_FILTER_LOOM_FNAME,HUMAN_TFS_FNAME,ADJACENCIES_FNAME))

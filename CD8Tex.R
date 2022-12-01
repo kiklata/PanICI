@@ -45,15 +45,15 @@ p = DimPlot(CD8.Tex.harmony,raster = F,label = F,group.by = 'label',
         axis.line.y = element_line(size = 0.5),
         axis.title.x = element_text(colour = 'black',size = 10),
         axis.title.y = element_text(colour = 'black',angle = 90,size = 10))
-ggsave('tex.png',p,width = 6,height = 4)
+ggsave('tex.pdf',p,width = 6,height = 4,device=cairo_pdf)
 
 
 # signature score ---------------------------------------------------------
 
-stem.feature = c('CCR7','TCF7','SELL','LEF1','TOX2','SOX4')
-resident.feature = c('NR4A1','NR4A3','CD69','CXCR6')
+stem.feature = c('CCR7','TCF7','SELL','LEF1','CCR5')
+resident.feature = c('NR4A1','NR4A3','CD69','CXCR6','ITGAE')
 cyto.feature = c('IFNG','GNLY','GZMB','GZMK','GZMH','GZMA','NKG7','FGFBP2')
-exhaust.feature =c('TIGIT','PDCD1','CTLA4','HAVCR2','LAG3','CXCL13')
+exhaust.feature =c('TOX2','SOX4','TIGIT','PDCD1','CTLA4','HAVCR2','LAG3','CXCL13')
 costi.feature = c('ICOS','TNFSF14','TNFRSF25','TNFRSF9','CD28','TNFSF4')
 
 sig.feature = c(stem.feature, resident.feature, cyto.feature, exhaust.feature, costi.feature)
@@ -68,26 +68,15 @@ gsva_es <- gsva(as.matrix(count), min.sz = 3,sig.list, method=c("ssgsea"), kcdf=
 signature_exp<-as.matrix(gsva_es)
 saveRDS(signature_exp,file = 'manual.ssgsea.rds')
 
-CD8.Tex.harmony@assays$score$score = manual.ssgsea
+CD8.Tex.harmony@assays$score$score = signature_exp
 
 saveRDS(CD8.Tex.harmony,file = 'CD8.Tex.harmony.rds')
 
-myannocol = data.frame(Cluster = CD8.Tex.harmony$RNA_snn_res.0.1)
-myannocol$Cluster = factor(myannocol$Cluster,levels = c('0','1','2'))
-
-myannorow = data.frame(gene = sig.feature,type = c(rep('Stem',length(stem.feature)),
-                                                   rep('Resident',length(resident.feature)),
-                                                   rep('Cyto',length(cyto.feature)),
-                                                   rep('Exhausted',length(exhaust.feature)),
-                                                   rep('Co-Sti',length(costi.feature))))
-myannorow$type = factor(myannorow$type,levels = c('Stem','Resident','Cyto','Exhausted','Co-Sti'))
-rownames(myannorow) = myannorow$gene
-myannorow$gene = NULL
-
+# gene avg.mat
 library(pheatmap)
 avg.mat = as.matrix(AverageExpression(CD8.Tex.harmony,features = sig.feature)[[1]])
 colnames(avg.mat) = c('Tex.c1','Tex.c2','Tex.c3')
-pdf('avg.heatmap.pdf',width = 3,height = 8)
+pdf('avg.heatmap.pdf',width = 3,height = 8,bg = 'white')
 pheatmap(avg.mat,
         cluster_rows = F,cluster_cols = F,
         cellwidth = 15,cellheight = 15,fontsize = 10,
@@ -101,6 +90,7 @@ pheatmap(avg.mat,
         )
 dev.off()
 
+# ssgsea score
 score = CD8.Tex.harmony@assays$score$score
 score = as.data.frame(t(score))
 CD8.Tex.harmony = AddMetaData(CD8.Tex.harmony,score)
@@ -133,8 +123,8 @@ p.exhaust = ggboxplot(data = plot.score,x = 'label',y = 'exhaust',color = 'label
 p.costi = ggboxplot(data = plot.score,x = 'label',y = 'costi',color = 'label',width = 0.5,
                       palette = c("#E41A1C", "#377EB8", "#4DAF4A"),outlier.shape = NA,add = 'none')+
   stat_compare_means(comparisons = my_comparisons, label = "p.signif")+NoLegend()+
-  labs(x = '',y ='costimulatory')+mytheme
+  labs(x = '',y ='Co-Stimulatory')+mytheme
 p2 = p.stem|p.resident|p.cyto|p.exhaust|p.costi
-ggsave('score.box.png',p2,width = 10,height = 4)
+ggsave('score.box.pdf',p2,width = 10,height = 4,device=cairo_pdf)
 
 # forest plot

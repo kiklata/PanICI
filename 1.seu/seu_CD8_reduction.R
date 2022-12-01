@@ -93,7 +93,7 @@ p11 = FeaturePlot(reCD8,features = c('GZMB'), cols = c('grey90','red3'),raster =
 p12 = FeaturePlot(reCD8,features = c('GZMK'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p13 = (p4|p5|p6)/(p7|p8|p9)/(p10|p11|p12)
 
-ggsave('feature.filter.png',p13,width = 12,height = 10)
+ggsave('feature.filter.pdf',p13,width = 12,height = 10,device=cairo_pdf)
 
 p14 = FeaturePlot(reCD8,features = c('TRDV2'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p15 = FeaturePlot(reCD8,features = c('TRGV9'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
@@ -180,7 +180,7 @@ reCD8$manual.celltype.major = factor(reCD8$manual.celltype.major,levels = c('Nai
 
 p1 = DimPlot(reCD8,group.by = 'manual.celltype.major',label = F,cols = mycol[c(1,2,5,6,7,8,9,10,12,13,14)],raster = F)+NoAxes()
 p2 = DimPlot(reCD8,group.by = 'manual.celltype.minor',label = F,cols = mycol,raster = F)+NoAxes()
-ggsave('dimplot_manual.png', p1|p2,width = 12,height = 4, dpi = 300)
+ggsave('dimplot_manual.pdf', p1|p2,width = 12,height = 4, dpi = 300,device=cairo_pdf)
 
 #p4 = DimPlot(reCD8,group.by = 'manual.celltype.major',label = F,cols = colorqual,split.by = 'sample.timepoint')
 #p5 = DimPlot(reCD8,group.by = 'manual.celltype.major',label = F,cols = colorqual,split.by = 'treatment.efficacy')
@@ -197,21 +197,21 @@ after = subset(tumor,sample.timepoint == 'After')
 source("~/PaperCD8/code/plotprop.R")
 p1 = plot.prop(before,cluster = 'manual.celltype.minor',timepoint = 'Pre-Treatment',bar.col = 'turquoise4')
 p2 = plot.prop(after,cluster = 'manual.celltype.minor',timepoint = 'Post-Treatment',bar.col = 'turquoise4')
-ggsave('prepost_prop.png',p1|p2,width = 10,height = 4)
+ggsave('prepost_prop.pdf',p1|p2,width = 10,height = 4,device=cairo_pdf)
 
 before.r = subset(before,treatment.efficacy == 'R')
 before.nr = subset(before,treatment.efficacy == 'NR')
 
 p3 = plot.prop(before.r,cluster = 'manual.celltype.minor',timepoint = 'Response',bar.col = 'turquoise4')
 p4 = plot.prop(before.nr,cluster = 'manual.celltype.minor',timepoint = 'Non Response',bar.col = 'turquoise4')
-ggsave('preRNR_prop.png',p3|p4,width = 10,height = 4)
+ggsave('preRNR_prop.pdf',p3|p4,width = 10,height = 4,device=cairo_pdf)
 
 after.r = subset(after,treatment.efficacy == 'R')
 after.nr = subset(after,treatment.efficacy == 'NR')
 
 p5 = plot.prop(after.r,cluster = 'manual.celltype.minor',timepoint = 'Response',bar.col = 'turquoise4')
 p6 = plot.prop(after.nr,cluster = 'manual.celltype.minor',timepoint = 'Non Response',bar.col = 'turquoise4')
-ggsave('postRNR_prop.png',p5|p6,width = 10,height = 4)
+ggsave('postRNR_prop.pdf',p5|p6,width = 10,height = 4,device=cairo_pdf)
 
 # before by study
 study.all = names(table(before$Study))[-5]
@@ -243,7 +243,7 @@ tumor = subset(reCD8,sample.Tissue == 'Tumor')
 before = subset(tumor,sample.timepoint == 'Before')
 
 p = plot.fc(before,cluster = 'manual.celltype.minor',norm.col = 'steelblue',sign.col = 'firebrick4',mytitle = 'Pre-Treatment')
-ggsave('preFC.png',p,width = 6,height = 4)
+ggsave('pretilFC.pdf',p,width = 6,height = 4,device=cairo_pdf)
 
 # bc_bassez----------------
 bassez = subset(reCD8,Study == 'BC_Bassez')
@@ -296,5 +296,5 @@ p6 = p4+p5+plot_layout(guides = 'collect')+
   plot_annotation(title = 'Post-Treatment',theme = theme(plot.title = element_text(hjust = 0.4)))
 
 p6
-ggsave('bassez.pre.png',p3,width = 10,height = 4)
-ggsave('bassez.post.png',p6,width = 10,height = 4)
+ggsave('bassez.pre.pdf',p3,width = 10,height = 4,device=cairo_pdf)
+ggsave('bassez.post.pdf',p6,width = 10,height = 4,device=cairo_pdf)
