@@ -23,30 +23,26 @@ CD8.Tex.harmony =  RunHarmony(CD8.Tex.harmony,group.by.vars = 'sample.ID',assay.
 
 CD8.Tex.harmony = RunUMAP(CD8.Tex.harmony,reduction = 'harmony',dims = 1:20,reduction.name = 'umap_harmony')
 
-CD8.Tex.harmony = FindNeighbors(CD8.Tex.harmony, reduction = "harmony", dims = 1:6)
+CD8.Tex.harmony = FindNeighbors(CD8.Tex.harmony, reduction = "harmony", dims = 1:8)
 
-CD8.Tex.harmony = FindClusters(CD8.Tex.harmony,resolution = seq(0.1,1,0.1))
+CD8.Tex.harmony = FindClusters(CD8.Tex.harmony,resolution = 0.2)
 
-Idents(CD8.Tex.harmony) = CD8.Tex.harmony$RNA_snn_res.0.1
+Idents(CD8.Tex.harmony) = CD8.Tex.harmony$RNA_snn_res.0.2
 
 CD8.Tex.harmony$RNA_snn_res.2 = NULL
 CD8.Tex.harmony@meta.data[,c(25:33)] = NULL
-CD8.Tex.harmony$seurat_clusters = CD8.Tex.harmony$RNA_snn_res.0.1
+CD8.Tex.harmony$seurat_clusters = CD8.Tex.harmony$RNA_snn_res.0.2
 
 saveRDS(CD8.Tex.harmony,file = 'CD8.Tex.harmony.rds')
 
-CD8.Tex.harmony$label = ifelse(CD8.Tex.harmony$RNA_snn_res.0.1 == '0','Tex.c1',
-                               if_else(CD8.Tex.harmony$RNA_snn_res.0.1 == '1','Tex.c2','Tex.c3'))
-p = DimPlot(CD8.Tex.harmony,raster = F,label = F,group.by = 'label',
-        cols = c( "#E41A1C", "#377EB8", "#4DAF4A"))+
-  NoAxes()+labs(title = 'Tex',x = 'UMAP1',y = 'UMAP2')+
-  theme(plot.title = element_text(face = 'plain',size = 15,hjust = 0.5),
-        axis.line.x = element_line(size = 0.5),
-        axis.line.y = element_line(size = 0.5),
-        axis.title.x = element_text(colour = 'black',size = 10),
-        axis.title.y = element_text(colour = 'black',angle = 90,size = 10))
-ggsave('tex.pdf',p,width = 6,height = 4,device=cairo_pdf)
+CD8.Tex.harmony$label = if_else(CD8.Tex.harmony$RNA_snn_res.0.2 == '0','Tex.c1',
+                               if_else(CD8.Tex.harmony$RNA_snn_res.0.2 == '1','Tex.c2',
+                                       if_else(CD8.Tex.harmony$RNA_snn_res.0.2 == '2','Tex.c3','Tex.c4')))
 
+CD8.Tex.harmony$manual.celltype.Tex = if_else(CD8.Tex.harmony$label == 'Tex.c1','Tex.c01.CCL4',
+                                              if_else(CD8.Tex.harmony$label == 'Tex.c2','Tex.c02.GZMH',
+                                                      if_else(CD8.Tex.harmony$label == 'Tex.c3','Tex.c03.IL7R',
+                                                              if_else(CD8.Tex.harmony$label == 'Tex.c4','Tex.c04.CREM','aa'))))
 
 # signature score ---------------------------------------------------------
 
@@ -72,59 +68,3 @@ CD8.Tex.harmony@assays$score$score = signature_exp
 
 saveRDS(CD8.Tex.harmony,file = 'CD8.Tex.harmony.rds')
 
-# gene avg.mat
-library(pheatmap)
-avg.mat = as.matrix(AverageExpression(CD8.Tex.harmony,features = sig.feature)[[1]])
-colnames(avg.mat) = c('Tex.c1','Tex.c2','Tex.c3')
-pdf('avg.heatmap.pdf',width = 3,height = 8,bg = 'white')
-pheatmap(avg.mat,
-        cluster_rows = F,cluster_cols = F,
-        cellwidth = 15,cellheight = 15,fontsize = 10,
-        scale = 'row',border = F,legend_breaks = c(-1,0,1),angle_col = 45,legend = T,
-        #annotation_names_row = F,annotation_row = myannorow,
-        #gaps_row = c(6,10,18,24),annotation_legend = F,annotation_colors = list(type = c('Stem' = 'grey40',
-        #                                                                        'Resident' = 'grey40',
-        #                                                                        'Cyto' = 'grey40',
-        #                                                                        'Exhausted' = 'grey40',
-        #                                                                        'Co-Sti' = 'grey40')),
-        )
-dev.off()
-
-# ssgsea score
-score = CD8.Tex.harmony@assays$score$score
-score = as.data.frame(t(score))
-CD8.Tex.harmony = AddMetaData(CD8.Tex.harmony,score)
-
-plot.score = CD8.Tex.harmony@meta.data[,c("stem","resident","cyto","exhaust","costi",'label')]
-library(ggpubr)
-plot.score$label = factor(plot.score$label,levels = c('Tex.c1','Tex.c2','Tex.c3'))
-my_comparisons <- list( c("Tex.c2", "Tex.c1"), c("Tex.c3", "Tex.c1"))
-
-mytheme = theme(axis.text.y = element_blank(),
-        axis.text.x = element_text(angle = 45,vjust = 0.5),
-        axis.ticks.y = element_blank())
-p.stem = ggboxplot(data = plot.score,x = 'label',y = 'stem',color = 'label',width = 0.5,
-                   palette = c("#E41A1C", "#377EB8", "#4DAF4A"),outlier.shape = NA,add = 'none')+
-  stat_compare_means(comparisons = my_comparisons, label = "p.signif")+NoLegend()+
-  labs(x = '',y ='Stemness')+mytheme
-
-p.resident = ggboxplot(data = plot.score,x = 'label',y = 'resident',color = 'label',width = 0.5,
-                   palette = c("#E41A1C", "#377EB8", "#4DAF4A"),outlier.shape = NA,add = 'none')+
-  stat_compare_means(comparisons = my_comparisons, label = "p.signif")+NoLegend()+
-  labs(x = '',y ='Resident')+mytheme
-p.cyto = ggboxplot(data = plot.score,x = 'label',y = 'cyto',color = 'label',width = 0.5,
-                   palette = c("#E41A1C", "#377EB8", "#4DAF4A"),outlier.shape = NA,add = 'none')+
-  stat_compare_means(comparisons = my_comparisons, label = "p.signif")+NoLegend()+
-  labs(x = '',y ='Cytotoxicity')+mytheme
-p.exhaust = ggboxplot(data = plot.score,x = 'label',y = 'exhaust',color = 'label',width = 0.5,
-                   palette = c("#E41A1C", "#377EB8", "#4DAF4A"),outlier.shape = NA,add = 'none')+
-  stat_compare_means(comparisons = my_comparisons, label = "p.signif")+NoLegend()+
-  labs(x = '',y ='Exhaustion')+mytheme
-p.costi = ggboxplot(data = plot.score,x = 'label',y = 'costi',color = 'label',width = 0.5,
-                      palette = c("#E41A1C", "#377EB8", "#4DAF4A"),outlier.shape = NA,add = 'none')+
-  stat_compare_means(comparisons = my_comparisons, label = "p.signif")+NoLegend()+
-  labs(x = '',y ='Co-Stimulatory')+mytheme
-p2 = p.stem|p.resident|p.cyto|p.exhaust|p.costi
-ggsave('score.box.pdf',p2,width = 10,height = 4,device=cairo_pdf)
-
-# forest plot

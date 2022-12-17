@@ -7,6 +7,10 @@ plan("multisession", workers = 8)
 options(future.globals.maxSize = 2400 * 1024^2)
 options(future.rng.onMisuse="ignore")
 
+library(showtext)
+library(ggplot2)
+font_add(family = "arial", regular = "software/fonts/arial.ttf")
+showtext_auto()
 
 mycol = c("#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5", "#D9D9D9", "#BC80BD",
           "#CCEBC5", "#FFED6F", "#66C2A5", "#FC8D62","#8DA0CB", "#E78AC3")
@@ -93,7 +97,8 @@ p11 = FeaturePlot(reCD8,features = c('GZMB'), cols = c('grey90','red3'),raster =
 p12 = FeaturePlot(reCD8,features = c('GZMK'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p13 = (p4|p5|p6)/(p7|p8|p9)/(p10|p11|p12)
 
-ggsave('feature.filter.pdf',p13,width = 12,height = 10,device=cairo_pdf)
+ggsave('feature.filter.png',p13,width = 12,height = 10)
+       #,device=cairo_pdf)
 
 p14 = FeaturePlot(reCD8,features = c('TRDV2'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
 p15 = FeaturePlot(reCD8,features = c('TRGV9'), cols = c('grey90','red3'),raster = F)+NoAxes()+NoLegend()
@@ -180,7 +185,8 @@ reCD8$manual.celltype.major = factor(reCD8$manual.celltype.major,levels = c('Nai
 
 p1 = DimPlot(reCD8,group.by = 'manual.celltype.major',label = F,cols = mycol[c(1,2,5,6,7,8,9,10,12,13,14)],raster = F)+NoAxes()
 p2 = DimPlot(reCD8,group.by = 'manual.celltype.minor',label = F,cols = mycol,raster = F)+NoAxes()
-ggsave('dimplot_manual.pdf', p1|p2,width = 12,height = 4, dpi = 300,device=cairo_pdf)
+ggsave('dimplot_manual.png', p1|p2,width = 12,height = 4, dpi = 300)
+       #,device=cairo_pdf)
 
 #p4 = DimPlot(reCD8,group.by = 'manual.celltype.major',label = F,cols = colorqual,split.by = 'sample.timepoint')
 #p5 = DimPlot(reCD8,group.by = 'manual.celltype.major',label = F,cols = colorqual,split.by = 'treatment.efficacy')
@@ -282,7 +288,7 @@ p4 = DimPlot(after.ba.e,group.by = 'manual.celltype.major',
   theme(plot.tag = element_text(face = 'plain',size = 10),
         axis.line.x = element_line(size = 0.5),
         axis.line.y = element_line(size = 0.5),
-        axis.title.x = element_text(colour = 'black',size = 10),
+        #axis.title.x = element_text(colour = 'black',size = 10),
         axis.title.y = element_text(colour = 'black',size = 10,angle = 90))
 p5 = DimPlot(after.ba.ne,group.by = 'manual.celltype.major',
              cols = mycol[c(1,2,5,6,7,8,9,10,12,13,14)],raster = F)+
@@ -290,7 +296,8 @@ p5 = DimPlot(after.ba.ne,group.by = 'manual.celltype.major',
   theme(plot.tag = element_text(face = 'plain',size = 10),
         axis.line.x = element_line(size = 0.5),
         #axis.line.y = element_line(size = 0.5),
-        axis.title.x = element_text(colour = 'black',size = 10))
+        #axis.title.x = element_text(colour = 'black',size = 10)
+        )
 
 p6 = p4+p5+plot_layout(guides = 'collect')+
   plot_annotation(title = 'Post-Treatment',theme = theme(plot.title = element_text(hjust = 0.4)))
