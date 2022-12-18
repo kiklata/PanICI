@@ -48,7 +48,7 @@ clusteronetexbox = function(obj,tissues,studys,denominator,removezero,ylabuse = 
   
   plot.df = filter(plot.df,textype == cluster)
   
-  ytitle =expression(atop('Frequency of Tex.c2',
+  ytitle =expression(atop('Frequency of Tex.c02.GZMH',
                           'in all CD8 T cells'))
 
   p = ggboxplot(plot.df, x = 'xname', y = 'prop',
