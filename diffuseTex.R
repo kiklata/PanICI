@@ -2,7 +2,7 @@ library(Seurat)
 library(dplyr)
 library(destiny)
 
-CD8.Tex.harmony <- readRDS("~/PaperCD8/data/Tex/CD8.Tex.harmony.rds")
+CD8.Tex.harmony <- readRDS("~/PaperCD8/data/Tex/CD8.Tex.downsample.rds")
 
 GeneExp.mtx <- GetAssayData(CD8.Tex.harmony, assay = "RNA", slot = "data") %>% as.matrix() # normalized data matrix
 

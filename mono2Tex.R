@@ -4,7 +4,7 @@ library(Seurat)
 library(SeuratWrappers)
 library(dplyr)
 
-CD8.Tex.harmony <- readRDS("~/PaperCD8/data/Tex/CD8.Tex.harmony.rds")
+CD8.Tex.harmony <- readRDS("~/PaperCD8/data/Tex/CD8.Tex.downsample.rds")
 
 expr_matrix = GetAssayData(CD8.Tex.harmony, assay = 'RNA', slot = 'counts')
 pdata = CD8.Tex.harmony@meta.data

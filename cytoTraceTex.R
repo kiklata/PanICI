@@ -2,7 +2,7 @@ library(Seurat)
 library(CytoTRACE)
 library(dplyr)
 
-CD8.Tex.harmony <- readRDS("~/PaperCD8/data/Tex/CD8.Tex.harmony.rds")
+CD8.Tex.harmony <- readRDS("~/PaperCD8/data/Tex/CD8.Tex.downsample.rds")
 
 count =  as.matrix(CD8.Tex.harmony@assays$RNA@counts)
 
