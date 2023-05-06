@@ -58,6 +58,7 @@ plot.fc = function(obj,cluster,norm.col = 'steelblue',sign.col = 'firebrick4',my
   #norm = filter(celltype.fc.d,type=='norm')
   #sign = filter(celltype.fc.d,type=='sign')
 
+  # or use ggpubr::ggbarplot 
   p = ggplot(celltype.fc.d,aes(x = celltype,y = celltype.fc))+
     geom_bar(aes(fill = type),stat = "identity",show.legend = F)+
     scale_fill_manual(values = c(norm.col,sign.col))+

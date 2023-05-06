@@ -1,4 +1,4 @@
-path=/home/shpc_100839/PaperCD8/data/Tex/compass/before
+path=/home/shpc_100839/PaperCD8/data/Tex/compass/liu
 outpath=/home/shpc_100839/PaperCD8/data/Tex/compass/res
 
 ls $path/*.tsv|cut -d"/" -f 9|cut -d"." -f 1 | sort -u |

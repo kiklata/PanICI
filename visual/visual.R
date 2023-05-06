@@ -62,6 +62,7 @@ Tex.volcano.margin.col = c('#4d4d4d')
 
 Tex.score.box.col = Tex.dim.col
 
+T.trajectory.col = CD8.dim.minor.col[c(1,2,4,7,8)]
 Tex.trajectory.col = colorRampPalette(rev(brewer.pal(10, "Spectral")))(99)
 
 # 0.3 obj load ------------------------------------------------------------
@@ -73,12 +74,11 @@ CD8.Tex.harmony <- readRDS("~/PaperCD8/data/Tex/CD8.Tex.harmony.rds")
 Tex.scenic.rss <- readRDS("~/PaperCD8/data/Tex/Tex.scenic.rss.rds")
 volcanodf <- readRDS("~/PaperCD8/data/Tex/volcanodf.rds")
 
-CD8.downsample <- readRDS("~/PaperCD8/data/trajectory/CD8.downsample.rds")
-CD8.downsample.DM <- readRDS("~/PaperCD8/data/trajectory/CD8.downsample.DM.rds")
-CD8.downsample.cds <- readRDS("~/PaperCD8/data/trajectory/CD8.downsample.cds.rds")
-CD8.downsample.genes <- readRDS("~/PaperCD8/data/trajectory/CD8.downsample.genes.rds")
-cytotrace.downsample <- readRDS("~/PaperCD8/data/trajectory/cytotrace.downsample.rds")
-
+CD8.downsample <- readRDS("~/PaperCD8/data/Tex/CD8.downsample.rds")
+cytotrace <- readRDS("~/cytotrace.rds")
+CD8.genes <- readRDS("~/CD8.genes.rds")
+CD8.cds <- readRDS("~/CD8.cds.rds")
+CD8.DM <- readRDS("~/CD8.DM.rds")
 
 
 # 1.1 CD8 dimplot ---------------------------------------------------------
@@ -140,13 +140,13 @@ p = p1|p2|p3
 ggsave('1.8.CD8.batch.png',p,width = 16,height = 4,dpi = 300)
 
 # 2.1 Tex dimplot ---------------------------------------------------------
-p = DimPlot(CD8.Tex.harmony,group.by = 'manual.celltype.Tex',cols = Tex.dim.col,raster = F)+
+p = DimPlot(CD8.Tex.harmony,group.by = 'manual.celltype.Tex',cols = Tex.dim.col,raster = F)+ 
   labs(title = '',x = 'UMAP1',y = 'UMAP2')+
   theme(axis.ticks = element_blank(),
-        axis.text = element_blank(),
+        axis.text = element_blank(), 
         axis.title = element_text(size = 10),
         legend.text = element_text(size = 10) )
-ggsave('2.1.Tex.dimplot.pdf',p,width = 6,height = 4,dpi = 300, device = cairo_pdf)
+ggsave('2.1.Tex.dimplot.pdf',p,width = 6,height = 4,dpi = 300, device = cairo_pdf) 
 
 # 2.2 Tex dotplot ---------------------------------------------------------
 gene = c('NR4A2','ZNF331','NR4A3','CXCR4','MYADM','CREM', # c04
@@ -195,27 +195,23 @@ gene = c(stem.feature, resident.feature, cyto.feature, exhaust.feature, costi.fe
 library(destiny)
 meta.all = CD8.downsample@meta.data
 
-tmp <- data.frame(DC1 = eigenvectors(CD8.downsample.DM)[, 1],
-                  DC2 = eigenvectors(CD8.downsample.DM)[, 2],
+tmp <- data.frame(DC1 = eigenvectors(CD8.DM)[, 1],
+                  DC2 = eigenvectors(CD8.DM)[, 2],
                   celltype = meta.all$manual.celltype.minor)
-tmp$celltype = if_else(tmp$celltype == 'Tex.c1','Tex.c01.CCL4',
-                       if_else(tmp$celltype == 'Tex.c2','Tex.c02.GZMH',
-                               if_else(tmp$celltype == 'Tex.c3','Tex.c03.IL7R',
-                                       if_else(tmp$celltype == 'Tex.c4','Tex.c04.CREM',tmp$celltype))))
-tmp$celltype = factor(tmp$celltype,levels = c('Tn.c01.CCR7','Tem.c02.GZMK','Tem.c04.GZMH','Tm.c05.NR4A1',
-                                              'T.c06.MHCII','Trm.c07.ZNF683','Tex.c01.CCL4','Tex.c02.GZMH','Tex.c03.IL7R','Tex.c04.CREM'))
+tmp$celltype = factor(tmp$celltype,levels = c('Tn.c01.CCR7','Tem.c02.GZMK',
+                                              'Tem.c04.GZMH','Trm.c07.ZNF683','Tex.c08.CXCL13'))
 
 ggplot(tmp, aes(x = DC1, y = DC2, colour = celltype)) +
-  geom_point() + scale_color_manual(values = CD8.downsample.minor.col) +
+  geom_point() + scale_color_manual(values = T.trajectory.col) +
   xlab("Diffusion component 1") +
   ylab("Diffusion component 2") +
   theme_classic()
 
 # monocle2
 library(monocle,lib.loc = '/home/shpc_100839/R/x86_64-pc-linux-gnu-library/4.2')
-plot_cell_trajectory(CD8.downsample.cds, color_by = "manual.celltype.minor",size=1,show_backbone=F)
+plot_cell_trajectory(CD8.cds, color_by = "manual.celltype.minor",size=1,show_backbone=T)
 
-plotdf = pData(CD8.downsample.cds)
+plotdf = pData(CD8Tex.cds)
 
 library(ggridges)
 
@@ -249,8 +245,8 @@ ggplot(data = plotdf2, aes(component1,component2,color=Pseudotime))+
 
 
 # cytotrace
-cytotrace.score = data.frame(names = names(cytotrace.downsample$CytoTRACE),
-                             score = cytotrace.downsample$CytoTRACE)
+cytotrace.score = data.frame(names = names(cytotrace$CytoTRACE),
+                             score = cytotrace$CytoTRACE)
 plotdf2$names = rownames(plotdf2)
 plotdf3 = left_join(plotdf2,cytotrace.score,by= 'names')
 
@@ -258,10 +254,37 @@ ggplot(data = plotdf3, aes(component1,component2,color=score))+
   geom_point()+scale_color_gradientn(colours = Tex.trajectory.col)+
   theme_classic()
 
+plotCytoTRACE(res,emb = CD8.Tex.harmony@reductions$umap_harmony@cell.embeddings)
+
 
 # 2.11 Tex scenic ---------------------------------------------------------
 
 
 # 2.12 Tex compass --------------------------------------------------------
 
+beforeres = list.files('~/PaperCD8/data/Tex/compass/before')
+beforeres = gsub('.tsv','',beforeres)
+beforeres = gsub('.pre','',beforeres)
+
+beforeres = paste('~/PaperCD8/data/Tex/compass/res',beforeres,'reactions.tsv',sep = '/')
+
+res1 = read.delim(beforeres[1])
+
+for (i in 2:length(beforeres)) {
+  res = read.delim(beforeres[i])
+  res1 = cbind(res1,res)
+}
+
+afterres = list.files('~/PaperCD8/data/Tex/compass/after')
+afterres = gsub('.tsv','',afterres)
+afterres = gsub('.post','',afterres)
+
+afterres = paste('~/PaperCD8/data/Tex/compass/res',afterres,'reactions.tsv',sep = '/')
+
+res2 = read.delim(afterres[1])
+
+for (i in 2:length(afterres)) {
+  res = read.delim(afterres[i])
+  res2 = cbind(res2,res)
+}
 
