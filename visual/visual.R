@@ -12,6 +12,7 @@ library(pheatmap)
 library(RColorBrewer)
 library(scales)
 library(ggsci)
+library(scCustomize) # dimplot feature plot
 library(patchwork)
 #library(showtext)
 #font_add('arial',regular = '~/software/fonts/arial.ttf')
