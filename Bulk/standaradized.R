@@ -1,7 +1,9 @@
 ## bulkDATA standardized
 
 # def: expr = TPM/FPKN, count = rawcount
-
+library(dplyr)
+library(clusterProfiler)
+library(org.Hs.eg.db)
 # 1 Braun_2020_ccRCC_PD1 -----------------------------------------------------------------
 # ref: Interplay of somatic alterations and immune infiltration modulates response to PD-1 blockade in advanced clear cell renal cell carcinoma
 
@@ -15,6 +17,8 @@ table(sample_n %in% all_n)
 
 clinical_subset = dplyr::filter(clinical,RNA_ID %in% all_n)
 clinical_subset = dplyr::filter(clinical_subset, Arm == 'NIVOLUMAB')
+
+normed = normed[!duplicated(normed$gene_name),]
 
 normed_subset = normed[,colnames(normed) %in% clinical_subset$RNA_ID]
 
@@ -32,6 +36,11 @@ clinical <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/GSE126043_NSCLC/clinic
 Cho_2020_NSCLC_PD1 = list(clinical = clinical, count = count)
 saveRDS(Cho_2020_NSCLC_PD1,'Cho_2020_NSCLC_PD1.rds')
 
+count = BulkICIdata$Cho_2020_NSCLC_PD1$count
+table(duplicated(count$gene))
+count = count[!duplicated(count$gene),]
+rownames(count) = count$gene
+count$gene = NULL
 
 # 3 Jung_2019_NSCLC_PD1_PDL1 ----------------------------------------------------------------
 # ref: DNA methylation loss promotes immune evasion of tumours with high mutation and copy number load
@@ -43,6 +52,17 @@ PFS <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/GSE135222_NSCLC/PFS.rds")
 Jung_2019_NSCLC_PD1_PDL1 = list(clinical = PFS, expr = tpm)
 saveRDS(Jung_2019_NSCLC_PD1_PDL1,'Jung_2019_NSCLC_PD1_PDL1.rds')
 
+tpm = BulkICIdata$Jung_2019_NSCLC_PD1_PDL1$expr
+tpm$ENSEMBL<-substring(tpm$gene_id, 1, 15)
+geneid<-bitr(tpm$ENSEMBL, fromType='ENSEMBL', toType='SYMBOL', OrgDb='org.Hs.eg.db', drop = TRUE)
+tpm = left_join(tpm,geneid,by = 'ENSEMBL')
+tpm = tpm[!is.na(tpm$SYMBOL),]
+tpm <- tpm[!duplicated(tpm$SYMBOL),]
+rownames(tpm) = tpm$SYMBOL
+tpm$SYMBOL = NULL
+tpm$gene_id = NULL
+tpm$ENSEMBL = NULL
+BulkICIdata$Jung_2019_NSCLC_PD1_PDL1$expr = tpm
 
 # 4 Hsu_2021_HCC_PD1_PDL1 -------------------------------------------------
 # ref: Exploring Markers of Exhausted CD8 T Cells to Predict Response to Immune Checkpoint Inhibitor Therapy for Hepatocellular Carcinoma
@@ -53,6 +73,11 @@ clinical <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/GSE141016_HCC/clinical
 Hsu_2021_HCC_PD1_PDL1 = list(clinical = clinical, expr = tpm)
 saveRDS(Hsu_2021_HCC_PD1_PDL1,'Hsu_2021_HCC_PD1_PDL1.rds')
 
+tpm = BulkICIdata$Hsu_2021_HCC_PD1_PDL1$expr
+table(duplicated(tpm$ID_REF))
+rownames(tpm) = tpm$ID_REF
+tpm$ID_REF = NULL
+BulkICIdata$Hsu_2021_HCC_PD1_PDL1$expr = tpm
 
 # 5 Hugo_2016_Melanoma_PD1 ------------------------------------------------
 # ref: Genomic and Transcriptomic Features of Response to Anti-PD-1 Therapy in Metastatic Melanoma
@@ -64,6 +89,11 @@ os <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/GSE78220_melanoma/os.rds")
 Hugo_2016_Melanoma_PD1 = list(clinical = os, expr = tpm)
 saveRDS(Hugo_2016_Melanoma_PD1,'Hugo_2016_Melanoma_PD1.rds')
 
+tpm = BulkICIdata$Hugo_2016_Melanoma_PD1$expr
+table(duplicated(tpm$Gene))
+rownames(tpm) = tpm$Gene
+tpm$Gene = NULL
+BulkICIdata$Hugo_2016_Melanoma_PD1$expr = tpm
 
 # 6 Riaz_2017_Melanoma_PD1 ------------------------------------------------
 # ref: Tumor and Microenvironment Evolution during Immunotherapy with Nivolumab
@@ -92,6 +122,31 @@ count.list = list(pre.expr,on.expr)
 
 Riaz_2017_Melanoma_PD1 = list(clinical = clinical, count = count.list)
 saveRDS(Riaz_2017_Melanoma_PD1,file = 'Riaz_2017_Melanoma_PD1.rds')
+
+count = BulkICIdata$Riaz_2017_Melanoma_PD1$count
+table(duplicated(count[[1]]$SYMBOL))
+count[[1]] = count[[1]][!duplicated(count[[1]]$SYMBOL),]
+count[[1]] = count[[1]][!is.na(count[[1]]$SYMBOL),]
+rownames(count[[1]]) = count[[1]]$SYMBOL
+count[[1]]$SYMBOL = NULL
+
+table(duplicated(count[[2]]$SYMBOL))
+count[[2]] = count[[2]][!duplicated(count[[2]]$SYMBOL),]
+count[[2]] = count[[2]][!is.na(count[[2]]$SYMBOL),]
+rownames(count[[2]]) = count[[2]]$SYMBOL
+count[[2]]$SYMBOL = NULL
+
+names(count) = c('Pre','On')
+BulkICIdata$Riaz_2017_Melanoma_PD1$count = count
+
+BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]] = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]][!duplicated(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL),]
+BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]] = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]][!is.na(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL),]
+rownames(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]) = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL
+BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL = NULL
+BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]] = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]][!duplicated(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]]$SYMBOL),]
+BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]] = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]][!is.na(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]]$SYMBOL),]
+rownames(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]]) = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]]$SYMBOL
+BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]]$SYMBOL = NULL
 
 
 # 7 Mariathasan_2018_UC_PDL1 ---------------------------------------------
@@ -125,6 +180,17 @@ clinical_ipipd1 <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/PRJEB23709_mela
 Gide_2019_Melanoma_PD1_CTLA4 = list(clinical = list(Comb = clinical_ipipd1, Mono = clinical_pd1),count = count)
 saveRDS(Gide_2019_Melanoma_PD1_CTLA4,'Gide_2019_Melanoma_PD1_CTLA4.rds')
 
+count = BulkICIdata$Gide_2019_Melanoma_PD1_CTLA4$count
+geneid<-bitr(count$ID, fromType='ENSEMBL', toType='SYMBOL', OrgDb='org.Hs.eg.db', drop = TRUE)
+colnames(count)[1] ='ENSEMBL'
+count = left_join(count,geneid,by = 'ENSEMBL')
+count = count[!is.na(count$SYMBOL),]
+count <- count[!duplicated(count$SYMBOL),]
+rownames(count) = count$SYMBOL
+count$SYMBOL = NULL
+count$ENSEMBL = NULL
+
+BulkICIdata$Gide_2019_Melanoma_PD1_CTLA4$count =count
 
 # 10 Zhao_2019_GBM_PD1 ----------------------------------------------------
 # ref: Immune and genomic correlates of response to anti-PD-1 immunotherapy in glioblastoma
@@ -137,8 +203,27 @@ clinical <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/PRJNA482620_glioma/cli
 clinical = ios$Zhao_GBM_pre_aPD1[,(1:7)]
 clinical_meta = ls_meta$Zhao_GBM_pre_aPD1
 
+count$ENSEMBL<-substring(rownames(count), 1, 15)
+geneid<-bitr(count$ENSEMBL, fromType='ENSEMBL', toType='SYMBOL', OrgDb='org.Hs.eg.db', drop = TRUE)
+count = left_join(count,geneid,by = 'ENSEMBL')
+count = count[!is.na(count$SYMBOL),]
+count <- count[!duplicated(count$SYMBOL),]
+rownames(count) = count$SYMBOL
+count$SYMBOL = NULL
+count$ENSEMBL = NULL
+
+tpm$ENSEMBL<-substring(rownames(tpm), 1, 15)
+geneid<-bitr(tpm$ENSEMBL, fromType='ENSEMBL', toType='SYMBOL', OrgDb='org.Hs.eg.db', drop = TRUE)
+tpm = left_join(tpm,geneid,by = 'ENSEMBL')
+tpm = tpm[!is.na(tpm$SYMBOL),]
+tpm <- tpm[!duplicated(tpm$SYMBOL),]
+rownames(tpm) = tpm$SYMBOL
+tpm$SYMBOL = NULL
+tpm$ENSEMBL = NULL
+
 Zhao_2019_GBM_PD1 = list(clinical = clinical, count = count,expr = tpm)
 saveRDS(Zhao_2019_GBM_PD1,'Zhao_2019_GBM_PD1.rds')
+
 
 
 # 11 Snyder_2017_UC_PD1 ---------------------------------------------------
@@ -163,6 +248,14 @@ meta = dplyr::filter(meta,patient_id %in% count_id)
 Snyder_2017_UC_PD1 = list(clinical = meta, count = count)
 saveRDS(Snyder_2017_UC_PD1,'Snyder_2017_UC_PD1.rds')
 
+count = BulkICIdata$Snyder_2017_UC_PD1$count
+table(duplicated(count$ptgene_name))
+count = count[!duplicated(count$ptgene_name),]
+count = count[!is.na(count$ptgene_name),]
+rownames(count) = count$ptgene_name
+count$ptgene_name = NULL
+BulkICIdata$Snyder_2017_UC_PD1$count = count
+
 
 # 12 Kim_2018_GC_PD1 ------------------------------------------------------
 # ref: Comprehensive molecular characterization of clinical responses to PD‑1 inhibition in metastatic gastric cancer
@@ -174,6 +267,11 @@ expr = ios$Kim_GC_pre_aPD1[,c(1,8:34012)]
 Kim_2018_GC_PD1 = list(clinical = clinical, expr = expr)
 saveRDS(Kim_2018_GC_PD1,'Kim_2018_GC_PD1.rds')
 
+tpm = BulkICIdata$Kim_2018_GC_PD1$expr
+tpm = t(tpm)
+tpm = as.data.frame(tpm)
+tpm= tpm[-1,]
+BulkICIdata$Kim_2018_GC_PD1$expr = tpm
 
 # 13 Van_2015_Melanoma_CTLA4 ------------------------------------------------------------------
 # ref: Genomic correlates of response to CTLA-4 blockade in metastatic melanoma
@@ -187,6 +285,11 @@ expr = ios$Kim_GC_pre_aPD1[,c(1,8:25664)]
 Van_2015_Melanoma_CTLA4 = list(clinical = clinical, expr = expr)
 saveRDS(Van_2015_Melanoma_CTLA4,'Van_2015_Melanoma_CTLA4.rds')
 
+tpm = BulkICIdata$Van_2015_Melanoma_CTLA4$expr
+tpm = t(tpm)
+tpm = as.data.frame(tpm)
+tpm= tpm[-1,]
+BulkICIdata$Van_2015_Melanoma_CTLA4$expr = tpm
 
 # Merge -------------------------------------------------------------------
 

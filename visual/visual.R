@@ -67,6 +67,8 @@ T.trajectory.col = CD8.dim.minor.col[c(1,2,4,7,8)]
 Tex.trajectory.col = colorRampPalette(rev(brewer.pal(10, "Spectral")))(99)
 
 # 0.3 obj load ------------------------------------------------------------
+selected.all.T <- readRDS("~/Project/PaperCD8/data/selected.all.T.rds")
+
 CD8 <- readRDS("~/PaperCD8/data/reCD8.finished.rds")
 
 Tprop <- read.csv("~/PaperCD8/data/Tprop.csv")
