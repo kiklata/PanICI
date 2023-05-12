@@ -26,6 +26,15 @@ Braun_2020_ccRCC_PD1 = list(clinical = clinical_subset, expr = normed_subset)
 
 saveRDS(Braun_2020_ccRCC_PD1,'Braun_2020_ccRCC_PD1.rds')
 
+expr = BulkICIdata$Braun_2020_ccRCC_PD1$expr
+expr$symbol = normed$gene_name
+
+expr = expr[!duplicated(expr$symbol),]
+expr = as.data.frame(expr)
+rownames(expr) = expr$symbol
+expr$symbol = NULL
+
+BulkICIdata$Braun_2020_ccRCC_PD1$expr = expr
 
 # 2 Cho_2020_NSCLC_PD1 ------------------------------------------------------------
 # ref: Genome-wide identification of differentially methylated promoters and enhancers associated with response to anti-PD-1 therapy in non-small cell lung cancer
@@ -41,6 +50,8 @@ table(duplicated(count$gene))
 count = count[!duplicated(count$gene),]
 rownames(count) = count$gene
 count$gene = NULL
+
+BulkICIdata$Cho_2020_NSCLC_PD1$count = count
 
 # 3 Jung_2019_NSCLC_PD1_PDL1 ----------------------------------------------------------------
 # ref: DNA methylation loss promotes immune evasion of tumours with high mutation and copy number load
@@ -91,6 +102,7 @@ saveRDS(Hugo_2016_Melanoma_PD1,'Hugo_2016_Melanoma_PD1.rds')
 
 tpm = BulkICIdata$Hugo_2016_Melanoma_PD1$expr
 table(duplicated(tpm$Gene))
+tpm = as.data.frame(tpm)
 rownames(tpm) = tpm$Gene
 tpm$Gene = NULL
 BulkICIdata$Hugo_2016_Melanoma_PD1$expr = tpm
@@ -138,8 +150,10 @@ count[[2]]$SYMBOL = NULL
 
 names(count) = c('Pre','On')
 BulkICIdata$Riaz_2017_Melanoma_PD1$count = count
+count1 = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]
+count1 = count1[!duplicated(count1$SYMBOL),]
+count2 = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[2]]
 
-BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]] = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]][!duplicated(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL),]
 BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]] = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]][!is.na(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL),]
 rownames(BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]) = BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL
 BulkICIdata$Riaz_2017_Melanoma_PD1$count[[1]]$SYMBOL = NULL
@@ -168,7 +182,9 @@ tpm <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/meta_melanoma/tpm.rds")
 
 Liu_2019_melanoma_PD1 = list(clinical = clinical, expr = tpm)
 saveRDS(Liu_2019_melanoma_PD1,'Liu_2019_Melanoma_PD1.rds')
-
+expr = BulkICIdata$Liu_2019_Melanoma_PD1$expr
+rownames(expr) = gsub('\\.','-', rownames(expr))
+BulkICIdata$Liu_2019_Melanoma_PD1$expr = expr
 
 # 9 Gide_2019_Melanoma_PD1_CTLA4 ----------------------------------------------------
 # ref: Distinct Immune Cell Populations Define Response to Anti-PD-1 Monotherapy and Anti-PD-1/Anti-CTLA-4 Combined Therapy
@@ -203,6 +219,7 @@ clinical <- readRDS("~/Project/PanCancerICI/Data/bulkDATA/PRJNA482620_glioma/cli
 clinical = ios$Zhao_GBM_pre_aPD1[,(1:7)]
 clinical_meta = ls_meta$Zhao_GBM_pre_aPD1
 
+count = BulkICIdata$Zhao_2019_GBM_PD1$count
 count$ENSEMBL<-substring(rownames(count), 1, 15)
 geneid<-bitr(count$ENSEMBL, fromType='ENSEMBL', toType='SYMBOL', OrgDb='org.Hs.eg.db', drop = TRUE)
 count = left_join(count,geneid,by = 'ENSEMBL')
@@ -212,6 +229,7 @@ rownames(count) = count$SYMBOL
 count$SYMBOL = NULL
 count$ENSEMBL = NULL
 
+tpm = BulkICIdata$Zhao_2019_GBM_PD1$expr
 tpm$ENSEMBL<-substring(rownames(tpm), 1, 15)
 geneid<-bitr(tpm$ENSEMBL, fromType='ENSEMBL', toType='SYMBOL', OrgDb='org.Hs.eg.db', drop = TRUE)
 tpm = left_join(tpm,geneid,by = 'ENSEMBL')
@@ -221,10 +239,12 @@ rownames(tpm) = tpm$SYMBOL
 tpm$SYMBOL = NULL
 tpm$ENSEMBL = NULL
 
+
 Zhao_2019_GBM_PD1 = list(clinical = clinical, count = count,expr = tpm)
 saveRDS(Zhao_2019_GBM_PD1,'Zhao_2019_GBM_PD1.rds')
 
-
+BulkICIdata$Zhao_2019_GBM_PD1$count = count
+BulkICIdata$Zhao_2019_GBM_PD1$expr = tpm
 
 # 11 Snyder_2017_UC_PD1 ---------------------------------------------------
 # ref: Contribution of systemic and somatic factors to clinical response and resistance to PD‑L1 blockade in urothelial cancer: an exploratory multi‑omic analysis.
