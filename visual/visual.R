@@ -291,3 +291,4 @@ for (i in 2:length(afterres)) {
   res2 = cbind(res2,res)
 }
 
+# add pseudotime Compass score like SCPA https://jackbibby1.github.io/SCPA/articles/pseudotime.html

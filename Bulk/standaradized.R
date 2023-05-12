@@ -341,3 +341,128 @@ BulkICIdata = list(Van_2015_Melanoma_CTLA4 = Van_2015_Melanoma_CTLA4,
                    Braun_2020_ccRCC_PD1 = Braun_2020_ccRCC_PD1,
                    Hsu_2021_HCC_PD1_PDL1 = Hsu_2021_HCC_PD1_PDL1)
 saveRDS(BulkICIdata,'BulkICIdata.rds')
+
+
+# load data ---------------------------------------------------------------
+
+BulkICIdata <- readRDS("~/Project/Signatures/Bulk_ICI_data/BulkICIdata.rds")
+
+status = vector()
+for (i in 1:length(BulkICIdata)) {
+  testdata = BulkICIdata[[i]]
+  obj = names(testdata)
+  if (('count' %in% obj) & ('expr' %in% obj)) {
+    status[i] = c('Finished')
+  } else if (('count' %in% obj) & !('expr' %in% obj)) {
+    status[i] = c('Count only')  # calculate TPM use IOBR
+  } else if (!('count' %in% obj) & ('expr' %in% obj)) {
+    status[i] = c('Expr only')
+    testdata$count = 'Unavailable'
+  }
+}
+
+# status 3, 4, 6, 7, 11 count---------------
+"""
+data = BulkICIdata[[3]]
+names(data$count) = c('Pre','On')
+
+countpre = data$count[[1]]
+tpm_pre = count2tpm(
+    countMat = countpre,
+    idType = 'SYMBOL',
+    org = 'hsa',
+    gene_symbol = rownames(countpre)
+  )
+counton = data$count[[2]]
+tpm_on = count2tpm(
+  countMat = counton,
+  idType = 'SYMBOL',
+  org = 'hsa',
+  gene_symbol = rownames(counton)
+)
+
+data$expr = list(Pre = tpm_pre, On = tpm_on)
+BulkICIdata[[3]] = data
+
+data = BulkICIdata[[4]]
+count = data$count
+tpm = count2tpm(
+  countMat = count,
+  idType = 'SYMBOL',
+  org = 'hsa',
+  gene_symbol = rownames(count)
+)
+
+data$expr = tpm
+BulkICIdata[[4]] = data
+
+
+data = BulkICIdata[[6]]
+count = data$count
+tpm = count2tpm(
+  countMat = count,
+  idType = 'SYMBOL',
+  org = 'hsa',
+  gene_symbol = rownames(count)
+)
+data$expr = tpm
+BulkICIdata[[6]] = data
+
+data = BulkICIdata[[7]]
+count = data$count
+tpm = count2tpm(
+  countMat = count,
+  idType = 'SYMBOL',
+  org = 'hsa',
+  gene_symbol = rownames(count)
+)
+data$expr = tpm
+BulkICIdata[[7]] = data
+
+data = BulkICIdata[[11]]
+count = data$count
+tpm = count2tpm(
+  countMat = count,
+  idType = 'SYMBOL',
+  org = 'hsa',
+  gene_symbol = rownames(count)
+)
+data$expr = tpm
+BulkICIdata[[11]] = data
+saveRDS(BulkICIdata,'BulkICIdata.rds')
+"""
+
+
+# correct gene ------------------------------------------------------------
+source("~/Project/PaperCD8/code/Bulk/geneCorrect.bulk.R")
+BulkICIdata <- readRDS("~/Project/Signatures/Bulk_ICI_data/BulkICIdata.rds")
+
+for (i in 1:length(BulkICIdata)) {
+  data = BulkICIdata[[i]]$expr
+  if (i == 3) {
+    data1 = data$Pre
+    new1 = gene.correct(data1)
+    BulkICIdata[[i]]$expr$Pre = new1
+    data2 = data$On
+    new2 = gene.correct(data2)
+    BulkICIdata[[i]]$expr$On = new1
+  } else {
+    new = gene.correct(data)
+    BulkICIdata[[i]]$expr = new
+  }
+}
+
+for (i in c(3, 4, 6, 7, 11)) {
+  data = BulkICIdata[[i]]$count
+  if (i == 3) {
+    data1 = data$Pre
+    new1 = gene.correct(data1)
+    BulkICIdata[[i]]$count$Pre = new1
+    data2 = data$On
+    new2 = gene.correct(data2)
+    BulkICIdata[[i]]$count$On = new1
+  } else {
+    new = gene.correct(data)
+    BulkICIdata[[i]]$count = new
+  }
+}
