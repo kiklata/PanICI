@@ -445,7 +445,7 @@ for (i in 1:length(BulkICIdata)) {
     BulkICIdata[[i]]$expr$Pre = new1
     data2 = data$On
     new2 = gene.correct(data2)
-    BulkICIdata[[i]]$expr$On = new1
+    BulkICIdata[[i]]$expr$On = new2
   } else {
     new = gene.correct(data)
     BulkICIdata[[i]]$expr = new
@@ -460,7 +460,7 @@ for (i in c(3, 4, 6, 7, 11)) {
     BulkICIdata[[i]]$count$Pre = new1
     data2 = data$On
     new2 = gene.correct(data2)
-    BulkICIdata[[i]]$count$On = new1
+    BulkICIdata[[i]]$count$On = new2
   } else {
     new = gene.correct(data)
     BulkICIdata[[i]]$count = new
