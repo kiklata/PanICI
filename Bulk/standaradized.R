@@ -300,7 +300,7 @@ BulkICIdata$Kim_2018_GC_PD1$expr = tpm
 clinical = ios$Van_SKCM_pre_aPD1[,c(1:6)] # 1 = R, 0 = NR
 meta = ls_meta$Van_SKCM_pre_aPD1
 clinical = dplyr::left_join(clinical,meta, by='ID')
-expr = ios$Kim_GC_pre_aPD1[,c(1,8:25664)]
+expr = ios$Van_SKCM_pre_aPD1[,c(1,8:25664)]
 
 Van_2015_Melanoma_CTLA4 = list(clinical = clinical, expr = expr)
 saveRDS(Van_2015_Melanoma_CTLA4,'Van_2015_Melanoma_CTLA4.rds')
@@ -465,4 +465,51 @@ for (i in c(3, 4, 6, 7, 11)) {
     new = gene.correct(data)
     BulkICIdata[[i]]$count = new
   }
+}
+
+numeric_dat = function(dat){
+  nam = rownames(dat)
+  dat = apply(dat,2,as.numeric)
+  rownames(dat) = nam
+  return(dat)
+}
+
+logTPM <- function(x) {return(log2(x+1))}
+expTPM = function(x){return(2^x)}
+
+
+tpmdata = c("Hugo_2016_Melanoma_PD1","Snyder_2017_UC_PD1",          
+            "Mariathasan_2018_UC_PDL1","Gide_2019_Melanoma_PD1_CTLA4", "Liu_2019_Melanoma_PD1",       
+            "Jung_2019_NSCLC_PD1_PDL1", "Zhao_2019_GBM_PD1", "Cho_2020_NSCLC_PD1")        
+
+tpm_riaz = 'Riaz_2017_Melanoma_PD1'
+
+for (i in tpmdata) {
+  data = BulkICIdata[[i]]$expr
+  da = numeric_dat(data) %>% as.data.frame()
+  BulkICIdata[[i]]$expr = da 
+  BulkICIdata[[i]]$log = da %>% mutate_if(is.numeric, logTPM)
+}
+
+BulkICIdata[[tpm_riaz]]$expr$Pre = BulkICIdata[[tpm_riaz]]$expr$Pre %>% numeric_dat() %>% as.data.frame()
+BulkICIdata[[tpm_riaz]]$expr$On = BulkICIdata[[tpm_riaz]]$expr$On %>% numeric_dat() %>% as.data.frame()
+
+BulkICIdata[[tpm_riaz]]$log$Pre = BulkICIdata[[tpm_riaz]]$expr$Pre %>% mutate_if(is.numeric, logTPM)
+BulkICIdata[[tpm_riaz]]$log$On = BulkICIdata[[tpm_riaz]]$expr$On %>% mutate_if(is.numeric, logTPM)
+
+logdata = c('Van_2015_Melanoma_CTLA4','Kim_2018_GC_PD1')
+
+for (i in logdata) {
+  data = BulkICIdata[[i]]$expr
+  da = numeric_dat(data) %>% as.data.frame()
+  BulkICIdata[[i]]$expr = da %>% mutate_if(is.numeric, expTPM)
+  BulkICIdata[[i]]$log =  BulkICIdata[[i]]$expr %>% mutate_if(is.numeric, logTPM)
+}
+
+normdata = c('Braun_2020_ccRCC_PD1','Hsu_2021_HCC_PD1_PDL1') # UQ/TMM
+for (i in normdata) {
+  data = BulkICIdata[[i]]$expr
+  da = numeric_dat(data) %>% as.data.frame()
+  BulkICIdata[[i]]$expr = da 
+  BulkICIdata[[i]]$log = da %>% mutate_if(is.numeric, logTPM)
 }
