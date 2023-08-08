@@ -56,7 +56,7 @@ clusteronetexbox = function(obj,tissues,studys,denominator,removezero,ylabuse = 
     theme(axis.text.x = element_text(angle = 45,vjust = 0.5,hjust = 0.8))+
     stat_compare_means(comparisons = mycomprassion,
                        method = "wilcox.test",
-                       label = "p.format",
+                       label = "p.format",tip.length = 0,size = 2,lwd = 0.5
                        #symnum.args=list(cutpoints = c(0, 0.001, 0.01, 0.05, 1,100),
                       #                  symbols = c("***", "**", "*", "",""))
                        
@@ -67,7 +67,7 @@ clusteronetexbox = function(obj,tissues,studys,denominator,removezero,ylabuse = 
         axis.text.x = element_text(color = 'black'),
         axis.text.y = element_text(color = 'black'),
         legend.position = 'bottom')
-  
+
   if (ylabuse == T) {
     p = p + ylab(label = ytitle) 
   }

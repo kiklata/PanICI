@@ -513,3 +513,13 @@ for (i in normdata) {
   BulkICIdata[[i]]$expr = da 
   BulkICIdata[[i]]$log = da %>% mutate_if(is.numeric, logTPM)
 }
+
+
+Riaz_2017_Melanoma_PD1_Pre = list(clinical = BulkICIdata$Riaz_2017_Melanoma_PD1$clinical,
+                                  count = BulkICIdata$Riaz_2017_Melanoma_PD1$count$Pre,
+                                  expr = BulkICIdata$Riaz_2017_Melanoma_PD1$expr$Pre,
+                                  log = BulkICIdata$Riaz_2017_Melanoma_PD1$log$Pre)
+Riaz_2017_Melanoma_PD1_On = list(clinical = BulkICIdata$Riaz_2017_Melanoma_PD1$clinical,
+                                 count = BulkICIdata$Riaz_2017_Melanoma_PD1$count$On,
+                                 expr = BulkICIdata$Riaz_2017_Melanoma_PD1$expr$On,
+                                 log = BulkICIdata$Riaz_2017_Melanoma_PD1$log$On)
